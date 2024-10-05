@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Pro Logger</string>
+    <string name="notification_name">Pro Logger Notification</string>
+    <string name="notification_content">Pro Logger is tracking log from your device..</string>
+</resources>
