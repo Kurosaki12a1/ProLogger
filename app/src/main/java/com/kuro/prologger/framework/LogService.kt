@@ -20,6 +20,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.kuro.prologger.MainActivity
 import com.kuro.prologger.R
+import com.kuro.prologger.presentation.floating_view.FloatingView
 
 class LogService : LifecycleService(), SavedStateRegistryOwner {
 
@@ -47,6 +48,8 @@ class LogService : LifecycleService(), SavedStateRegistryOwner {
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "onCreate")
+        savedStateRegistryController.performAttach()
+        savedStateRegistryController.performRestore(null)
 
         startForeground()
 
@@ -54,7 +57,9 @@ class LogService : LifecycleService(), SavedStateRegistryOwner {
         composeView = ComposeView(this).apply {
             setViewTreeLifecycleOwner(this@LogService)
             setViewTreeSavedStateRegistryOwner(this@LogService)
-            setContent { }
+            setContent {
+                FloatingView()
+            }
         }
 
         val params = WindowManager.LayoutParams(

@@ -1,5 +1,6 @@
 package com.kuro.prologger.util
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -14,6 +15,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.delay
 
 @Composable
 fun RequestSinglePermission(
@@ -93,6 +95,8 @@ fun RequestExternalStoragePermission(context: Context, onPermissionGranted: () -
         if (isExternalStorageManager()) {
             onPermissionGranted.invoke()
         } else {
+            // See Splash Screen a bit before requesting permission
+            delay(500L)
             val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
             intent.data = Uri.parse("package:${context.packageName}")
             manageStoragePermissionLauncher.launch(intent)
@@ -100,13 +104,13 @@ fun RequestExternalStoragePermission(context: Context, onPermissionGranted: () -
     }
 }
 
-fun requestOverlayPermission(context: Context) {
-    if (!hasOverlayPermission(context)) {
+fun requestOverlayPermission(activity: Activity, code: Int) {
+    if (!hasOverlayPermission(activity)) {
         val intent = Intent(
             Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-            Uri.parse("package:${context.packageName}")
+            Uri.parse("package:${activity.packageName}")
         )
-        context.startActivity(intent)
+        activity.startActivityForResult(intent, code)
     }
 }
 

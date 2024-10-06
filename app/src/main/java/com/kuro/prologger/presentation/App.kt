@@ -3,20 +3,24 @@ package com.kuro.prologger.presentation
 import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -28,12 +32,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.kuro.prologger.R
+import com.kuro.prologger.core.AppNavigationBar
 import com.kuro.prologger.navigation.Graph
 import com.kuro.prologger.navigation.Route
 import com.kuro.prologger.navigation.bottomNavigationItems
 import com.kuro.prologger.navigation.graph.RootNavGraph
 import com.kuro.prologger.navigation.util.AppNavigator
 import com.kuro.prologger.navigation.util.NavigationIntent
+import com.kuro.prologger.presentation.theme.BackgroundColor
 import com.kuro.prologger.presentation.theme.GreenColor
 import com.kuro.prologger.presentation.theme.titleFont
 import kotlinx.coroutines.channels.Channel
@@ -41,18 +47,18 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App(
-    appNavigator: AppNavigator
+    appNavigator: AppNavigator,
+    onFloatingButtonClick: () -> Unit
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     val shouldShowTopAndBottomBar = remember(navBackStackEntry) {
-        derivedStateOf {
-            currentRoute == null || currentRoute != Route.Splash::class.qualifiedName
-        }
+        derivedStateOf { currentRoute != null && currentRoute != Route.Splash::class.qualifiedName }
     }
 
     NavigationEffects(
@@ -61,41 +67,56 @@ fun App(
     )
 
     Scaffold(
-        containerColor = Color.Black,
+        containerColor = Color.White,
         topBar = {
             if (shouldShowTopAndBottomBar.value) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
+                TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.White
+                    ),
+                    title = {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                            color = GreenColor,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontFamily = titleFont,
+                            text = stringResource(R.string.app_name)
+                        )
+                    }
+                )
+            }
+        },
+        floatingActionButton = {
+            if (shouldShowTopAndBottomBar.value) {
+                FloatingActionButton(
+                    shape = CircleShape,
+                    onClick = onFloatingButtonClick,
+                    containerColor = BackgroundColor
                 ) {
                     Text(
-                        textAlign = TextAlign.Center,
-                        color = GreenColor,
-                        style = MaterialTheme.typography.headlineMedium,
+                        text = stringResource(R.string.start_get_log),
                         fontFamily = titleFont,
-                        modifier = Modifier.align(Alignment.Center),
-                        text = stringResource(R.string.app_name)
-                    )
-                    Image(
-                        modifier = Modifier.align(Alignment.CenterEnd),
-                        painter = painterResource(R.drawable.ic_settings),
-                        contentDescription = "Settings"
+                        color = GreenColor
                     )
                 }
             }
         },
+        floatingActionButtonPosition = FabPosition.End,
         bottomBar = {
             if (shouldShowTopAndBottomBar.value) {
-                BottomNavigationBar(
-                    selectedRoute = getCurrentRoute(currentRoute),
-                    onNavigationClick = {
-                        navController.navigate(it) {
-                            launchSingleTop = true
-                            restoreState = true
+                Column {
+                    HorizontalDivider(color = BackgroundColor, thickness = 1.dp)
+                    BottomNavigationBar(
+                        selectedRoute = getCurrentRoute(currentRoute),
+                        onNavigationClick = {
+                            navController.navigate(it) {
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
     ) {
@@ -105,34 +126,12 @@ fun App(
             startDestination = Graph.SplashGraph
         )
     }
-
-    /*   LaunchedEffect(Unit) {
-           coroutineScope.launch {
-               while (true) {
-                   logList = readDeviceLogs()
-                   delay(2000L) // Refresh every 2 seconds
-               }
-           }
-       }
-
-       LazyColumn(
-           modifier = Modifier
-               .background(Color.Black)
-               .padding(16.dp)
-       ) {
-           items(logList) { log ->
-               Text(
-                   text = log,
-                   color = Color.White,
-                   modifier = Modifier.padding(vertical = 4.dp)
-               )
-           }
-       }*/
 }
 
 fun getCurrentRoute(route: String?): Route {
-    return if (route == null) return Route.Splash
-    else Route::class.sealedSubclasses.find { it.qualifiedName == route }?.objectInstance ?: Route.Splash
+    return if (route == null) return Route.Home
+    else Route::class.sealedSubclasses.find { it.qualifiedName == route }?.objectInstance
+        ?: Route.Home
 }
 
 @Composable
@@ -140,11 +139,10 @@ fun BottomNavigationBar(
     selectedRoute: Route,
     onNavigationClick: (Route) -> Unit
 ) {
-    NavigationBar(
+    AppNavigationBar(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
-            .padding(8.dp),
+            .background(Color.White),
         containerColor = Color.White
     ) {
         bottomNavigationItems.forEach { item ->

@@ -2,4 +2,7 @@
     <string name="app_name">Pro Logger</string>
     <string name="notification_name">Pro Logger Notification</string>
     <string name="notification_content">Pro Logger is tracking log from your device..</string>
+    <string name="start_get_log">Start!</string>
+    <string name="need_request_permission">Permissions are required for this feature</string>
+    <string name="need_overlay">Overlay permission is required for this feature</string>
 </resources>

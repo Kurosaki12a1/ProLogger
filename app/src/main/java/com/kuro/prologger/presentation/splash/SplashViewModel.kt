@@ -31,11 +31,11 @@ class SplashViewModel @Inject constructor(
     fun checkPermissions() {
         job?.cancel()
         job = viewModelScope.launch {
-            delay(500)
+            // Want user see splash screen before request
             allPermissionsGranted.value = storagePermissionUseCase()
             if (allPermissionsGranted.value) {
                 viewModelScope.launch {
-                    delay(1500)
+                    delay(2000)
                     _isTimerFinished.value = true
                 }
             }
