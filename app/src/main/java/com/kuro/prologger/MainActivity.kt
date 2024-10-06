@@ -5,10 +5,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.kuro.prologger.navigation.util.AppNavigator
-import com.kuro.prologger.screen.App
-import com.kuro.prologger.ui.theme.ProLoggerTheme
+import com.kuro.prologger.presentation.App
+import com.kuro.prologger.presentation.theme.ProLoggerTheme
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
 @AndroidEntryPoint

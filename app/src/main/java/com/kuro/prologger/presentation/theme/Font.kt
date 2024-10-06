@@ -1,4 +1,4 @@
-package com.kuro.prologger.ui.theme
+package com.kuro.prologger.presentation.theme
 
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily

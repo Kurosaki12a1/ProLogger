@@ -1,4 +1,4 @@
-package com.kuro.prologger.screen
+package com.kuro.prologger.presentation
 
 import android.app.Activity
 import androidx.compose.foundation.Image
@@ -34,8 +34,8 @@ import com.kuro.prologger.navigation.bottomNavigationItems
 import com.kuro.prologger.navigation.graph.RootNavGraph
 import com.kuro.prologger.navigation.util.AppNavigator
 import com.kuro.prologger.navigation.util.NavigationIntent
-import com.kuro.prologger.ui.theme.GreenColor
-import com.kuro.prologger.ui.theme.titleFont
+import com.kuro.prologger.presentation.theme.GreenColor
+import com.kuro.prologger.presentation.theme.titleFont
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import java.io.BufferedReader

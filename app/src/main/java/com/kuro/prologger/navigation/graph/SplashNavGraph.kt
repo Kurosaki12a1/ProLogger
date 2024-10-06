@@ -5,7 +5,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.kuro.prologger.navigation.Graph
 import com.kuro.prologger.navigation.Route
-import com.kuro.prologger.screen.splash.SplashScreen
+import com.kuro.prologger.presentation.splash.SplashScreen
 
 fun NavGraphBuilder.splashNavGraph() {
     navigation<Graph.SplashGraph>(

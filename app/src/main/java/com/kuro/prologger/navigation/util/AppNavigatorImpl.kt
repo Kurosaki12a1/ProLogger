@@ -31,7 +31,7 @@ class AppNavigatorImpl @Inject constructor() : AppNavigator {
 
     override suspend fun navigateTo(
         route: Route,
-        popUpToRoute: String?,
+        popUpToRoute: Route?,
         inclusive: Boolean,
         isSingleTop: Boolean
     ) {
@@ -47,7 +47,7 @@ class AppNavigatorImpl @Inject constructor() : AppNavigator {
 
     override fun tryNavigateTo(
         route: Route,
-        popUpToRoute: String?,
+        popUpToRoute: Route?,
         inclusive: Boolean,
         isSingleTop: Boolean
     ) {

@@ -4,10 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
+import android.os.Environment.isExternalStorageManager
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
@@ -58,22 +61,52 @@ fun RequestMultiplePermissions(
         ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
     }
 
-    if (allPermissionsGranted) {
-        // All permissions are already granted
-        val grantedPermissionsMap = permissions.associateWith { true }
-        onPermissionsResult(grantedPermissionsMap)
-    } else {
-        // Launch the permissions request
-        permissionsLauncher.launch(permissions.toTypedArray())
+    LaunchedEffect(allPermissionsGranted) {
+        if (allPermissionsGranted) {
+            // All permissions are already granted
+            val grantedPermissionsMap = permissions.associateWith { true }
+            onPermissionsResult(grantedPermissionsMap)
+        } else {
+            // Launch the permissions request
+            permissionsLauncher.launch(permissions.toTypedArray())
+        }
     }
 }
 
 @Composable
-fun RequestOverlayPermission() {
-    val context = LocalContext.current
+fun RequestExternalStoragePermission(context: Context, onPermissionGranted: () -> Unit) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+        onPermissionGranted.invoke()
+        return
+    }
 
+    val manageStoragePermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+        onResult = {
+            if (isExternalStorageManager()) {
+                onPermissionGranted.invoke()
+            }
+        }
+    )
+
+    LaunchedEffect(Unit) {
+        if (isExternalStorageManager()) {
+            onPermissionGranted.invoke()
+        } else {
+            val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+            intent.data = Uri.parse("package:${context.packageName}")
+            manageStoragePermissionLauncher.launch(intent)
+        }
+    }
+}
+
+fun requestOverlayPermission(context: Context) {
     if (!hasOverlayPermission(context)) {
-        requestOverlayPermission(context)
+        val intent = Intent(
+            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+            Uri.parse("package:${context.packageName}")
+        )
+        context.startActivity(intent)
     }
 }
 
@@ -81,10 +114,12 @@ fun hasOverlayPermission(context: Context): Boolean {
     return Settings.canDrawOverlays(context)
 }
 
-fun requestOverlayPermission(context: Context) {
-    val intent = Intent(
-        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-        Uri.parse("package:${context.packageName}")
-    )
-    context.startActivity(intent)
+fun requestExternalStorage(context: Context) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (!isExternalStorageManager()) {
+            val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+            intent.data = Uri.parse("package:${context.packageName}")
+            context.startActivity(intent)
+        }
+    }
 }

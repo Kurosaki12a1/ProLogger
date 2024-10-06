@@ -18,14 +18,14 @@ interface AppNavigator {
 
     suspend fun navigateTo(
         route: Route,
-        popUpToRoute: String? = null,
+        popUpToRoute: Route? = null,
         inclusive: Boolean = false,
         isSingleTop: Boolean = false,
     )
 
     fun tryNavigateTo(
         route: Route,
-        popUpToRoute: String? = null,
+        popUpToRoute: Route? = null,
         inclusive: Boolean = false,
         isSingleTop: Boolean = false,
     )
@@ -39,7 +39,7 @@ sealed class NavigationIntent {
 
     data class NavigateTo(
         val route: Route,
-        val popUpToRoute: String? = null,
+        val popUpToRoute: Route? = null,
         val inclusive: Boolean = false,
         val isSingleTop: Boolean = false,
     ) : NavigationIntent()

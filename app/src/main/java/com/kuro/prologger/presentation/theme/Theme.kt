@@ -1,4 +1,4 @@
-package com.kuro.prologger.ui.theme
+package com.kuro.prologger.presentation.theme
 
 import android.app.Activity
 import android.os.Build
