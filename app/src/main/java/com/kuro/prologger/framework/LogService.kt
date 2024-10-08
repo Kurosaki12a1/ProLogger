@@ -10,6 +10,10 @@ import android.graphics.PixelFormat
 import android.util.Log
 import android.view.MotionEvent
 import android.view.WindowManager
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
@@ -36,6 +40,7 @@ class LogService : LifecycleService(), SavedStateRegistryOwner {
     private lateinit var windowManager: WindowManager
     private lateinit var composeView: ComposeView
 
+    private var shouldShowLog: MutableState<Boolean> = mutableStateOf(false)
     private var initialX = 0
     private var initialY = 0
     private var initialTouchX = 0f
@@ -58,7 +63,10 @@ class LogService : LifecycleService(), SavedStateRegistryOwner {
             setViewTreeLifecycleOwner(this@LogService)
             setViewTreeSavedStateRegistryOwner(this@LogService)
             setContent {
-                FloatingView()
+                val value by shouldShowLog
+                FloatingView(
+                    shouldShowLog = value
+                )
             }
         }
 
@@ -90,10 +98,12 @@ class LogService : LifecycleService(), SavedStateRegistryOwner {
                     windowManager.updateViewLayout(composeView, params)
                     true
                 }
-                /*   MotionEvent.ACTION_UP -> {
-                       composeView.performClick()
-                       true
-                   }*/
+
+                MotionEvent.ACTION_UP -> {
+                    shouldShowLog.value = !shouldShowLog.value
+                    true
+                }
+
                 else -> false
             }
         }
@@ -140,7 +150,7 @@ class LogService : LifecycleService(), SavedStateRegistryOwner {
         return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
             .setContentTitle(getString(R.string.notification_name))
             .setContentText(getString(R.string.notification_content))
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.ic_notification_foreground)
             .setContentIntent(pendingIntent)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setColor(getColor(R.color.app_color))
