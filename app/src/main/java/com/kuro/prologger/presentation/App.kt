@@ -123,7 +123,7 @@ fun App(
         RootNavGraph(
             navController = navController,
             paddingValues = it,
-            startDestination = Graph.SplashGraph
+            startDestination = Graph.HomeGraph
         )
     }
 }

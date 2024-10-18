@@ -150,7 +150,7 @@ class LogService : LifecycleService(), SavedStateRegistryOwner {
         return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
             .setContentTitle(getString(R.string.notification_name))
             .setContentText(getString(R.string.notification_content))
-            .setSmallIcon(R.drawable.ic_notification_foreground)
+            .setSmallIcon(R.drawable.ic_floating_button)
             .setContentIntent(pendingIntent)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setColor(getColor(R.color.app_color))

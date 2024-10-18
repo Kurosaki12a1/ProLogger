@@ -34,8 +34,8 @@ fun FloatingView(
         ) {
             Image(
                 modifier = Modifier.size(40.dp),
-                contentScale = ContentScale.Fit,
-                painter = painterResource(R.drawable.ic_launcher_foreground),
+                contentScale = ContentScale.Crop,
+                painter = painterResource(R.drawable.ic_floating_button),
                 contentDescription = null
             )
         }
@@ -45,7 +45,7 @@ fun FloatingView(
                 .width(200.dp)
                 .padding(10.dp)
         ) {
-            Text(text = "Texttttttttttttt")
+            Text(text = "This is a text...")
             Icon(
                 imageVector = Icons.Default.Clear,
                 contentDescription = null

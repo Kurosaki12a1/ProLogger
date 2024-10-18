@@ -2,8 +2,11 @@ package com.kuro.prologger
 
 import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -11,6 +14,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.core.content.ContextCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.kuro.prologger.extension.isServiceRunning
 import com.kuro.prologger.framework.LogService
 import com.kuro.prologger.navigation.util.AppNavigator
@@ -25,9 +30,29 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         private const val REQUEST_CODE_OVERLAY_PERMISSION = 100
+        private const val REQUEST_CODE_STORAGE_PERMISSION = 101
     }
 
     private val viewModel: MainViewModel by viewModels()
+
+    private val permissionStorageLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allPermissionsGranted = permissions.values.all { it }
+        if (allPermissionsGranted) {
+            enableEdgeToEdge()
+            setContent {
+                ProLoggerTheme {
+                    App(
+                        appNavigator = navigator,
+                        onFloatingButtonClick = { onFloatingButtonClick() }
+                    )
+                }
+            }
+        } else {
+            finish()
+        }
+    }
 
     @Inject
     lateinit var navigator: AppNavigator
@@ -46,15 +71,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
         enableEdgeToEdge()
-        setContent {
-            ProLoggerTheme {
-                App(
-                    appNavigator = navigator,
-                    onFloatingButtonClick = { onFloatingButtonClick() }
-                )
-            }
-        }
+        checkPermissions()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -68,6 +87,21 @@ class MainActivity : ComponentActivity() {
                     getString(R.string.need_overlay),
                     Toast.LENGTH_SHORT
                 ).show()
+            }
+        } else if (requestCode == REQUEST_CODE_STORAGE_PERMISSION
+            && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+        ) {
+            if (Environment.isExternalStorageManager()) {
+                setContent {
+                    ProLoggerTheme {
+                        App(
+                            appNavigator = navigator,
+                            onFloatingButtonClick = { onFloatingButtonClick() }
+                        )
+                    }
+                }
+            } else {
+                finish()
             }
         }
     }
@@ -110,6 +144,51 @@ class MainActivity : ComponentActivity() {
             }
         } else {
             stopService(Intent(this, LogService::class.java))
+        }
+    }
+
+    private fun checkPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (Environment.isExternalStorageManager()) {
+                setContent {
+                    ProLoggerTheme {
+                        App(
+                            appNavigator = navigator,
+                            onFloatingButtonClick = { onFloatingButtonClick() }
+                        )
+                    }
+                }
+            } else {
+                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                intent.data = Uri.parse("package:${packageName}")
+                startActivityForResult(intent, REQUEST_CODE_STORAGE_PERMISSION)
+            }
+        } else {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) == PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                setContent {
+                    ProLoggerTheme {
+                        App(
+                            appNavigator = navigator,
+                            onFloatingButtonClick = { onFloatingButtonClick() }
+                        )
+                    }
+                }
+            } else {
+                permissionStorageLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    )
+                )
+            }
         }
     }
 

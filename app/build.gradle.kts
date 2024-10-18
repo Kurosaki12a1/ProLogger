@@ -65,6 +65,9 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
+    // Splash API
+    implementation(libs.androidx.core.splashscreen)
+
     // Life Cycle Service
     implementation(libs.androidx.lifecycle.service)
 
